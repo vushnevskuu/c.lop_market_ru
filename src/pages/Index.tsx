@@ -9,6 +9,7 @@ import ProductModal from "@/components/ProductModal";
 import GeoHomeJsonLd from "@/components/GeoHomeJsonLd";
 import Footer from "@/components/Footer";
 import ShoeCanvas from "@/components/ShoeCanvas";
+import { cn } from "@/lib/utils";
 
 const Index = memo(() => {
   const createShoeRef = useRef<(() => void) | null>(null);
@@ -112,7 +113,10 @@ const Index = memo(() => {
       {useScrollContainer ? (
         <div
           ref={scrollContainerRef}
-          className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto overflow-x-hidden"
+          className={cn(
+            "flex min-h-0 w-full flex-1 flex-col overflow-x-hidden",
+            modalOpen ? "overflow-hidden" : "overflow-y-auto"
+          )}
           style={{
             height: "100dvh",
             maxHeight: "100dvh",

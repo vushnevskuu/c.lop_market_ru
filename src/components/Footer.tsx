@@ -24,8 +24,16 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
 
   // Memoized handlers to prevent recreation
   const handleWheel = useCallback((e: WheelEvent) => {
+    if (document.documentElement.dataset.clopProductModal === "open") return;
+    if (
+      e.target instanceof Element &&
+      e.target.closest("[data-product-modal-scroll]")
+    ) {
+      return;
+    }
+
     if (!footerRef.current) return;
-    
+
     if (isAtBottom() && e.deltaY > 0) {
       e.preventDefault();
       e.stopPropagation();
@@ -33,19 +41,27 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
   }, [isAtBottom]);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (document.documentElement.dataset.clopProductModal === "open") return;
+    if (
+      e.target instanceof Element &&
+      e.target.closest("[data-product-modal-scroll]")
+    ) {
+      return;
+    }
+
     if (!footerRef.current) return;
-    
+
     const atBottom = isAtBottom();
-    
+
     if (atBottom) {
       const touch = e.touches[0];
       const element = document.elementFromPoint(touch.clientX, touch.clientY);
-      
+
       if (footerRef.current.contains(element)) {
         e.preventDefault();
       }
     }
-  }, []);
+  }, [isAtBottom]);
 
   useEffect(() => {
     if (onShoeCreate) {

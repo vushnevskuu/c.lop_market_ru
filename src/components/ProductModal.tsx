@@ -67,6 +67,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [logoWidth, setLogoWidth] = useState(120);
     const imageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+    const scrollRef = useRef<HTMLDivElement>(null);
 
     const productImages = useMemo(() => {
       if (!product) return [];
@@ -103,11 +104,18 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
       const body = document.body;
       const prevHtml = html.style.overflow;
       const prevBody = body.style.overflow;
+      const prevModalFlag = html.dataset.clopProductModal;
+      html.dataset.clopProductModal = "open";
       html.style.overflow = "hidden";
       body.style.overflow = "hidden";
       return () => {
         html.style.overflow = prevHtml;
         body.style.overflow = prevBody;
+        if (prevModalFlag === undefined) {
+          delete html.dataset.clopProductModal;
+        } else {
+          html.dataset.clopProductModal = prevModalFlag;
+        }
       };
     }, [open]);
 
@@ -142,8 +150,8 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
           ) : null}
           <DialogPrimitive.Content
             className={cn(
-              // Внешний flex + overflow-hidden + явная высота; скролл только у flex-1 min-h-0 — иначе scrollHeight схлопывается.
-              "fixed bottom-[6px] left-[6px] right-[6px] top-[6px] z-[100] mx-auto flex w-full max-w-[min(1600px,calc(100vw-12px))] min-h-0 flex-col overflow-hidden border border-border bg-background p-0 shadow-lg",
+              // Явная высота + flex: скролл только у внутреннего блока (Safari/Chrome).
+              "fixed bottom-[6px] left-[6px] right-[6px] top-[6px] z-[100] mx-auto flex h-[calc(100dvh-12px)] max-h-[calc(100dvh-12px)] w-full max-w-[min(1600px,calc(100vw-12px))] min-h-0 flex-col overflow-hidden border border-border bg-background p-0 shadow-lg",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
             )}
             onOpenAutoFocus={(e) => e.preventDefault()}
@@ -164,8 +172,12 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
             </div>
 
             <div
+              ref={scrollRef}
+              data-product-modal-scroll
               className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain [-webkit-overflow-scrolling:touch]"
               style={{ touchAction: "pan-y" }}
+              onWheel={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
             >
             <DialogPrimitive.Title className="sr-only">{titleText}</DialogPrimitive.Title>
             <DialogPrimitive.Description className="sr-only">
@@ -194,7 +206,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                 <>
                   {open && <GeoProductJsonLd product={product} />}
                   <div className="flex min-w-0 flex-col gap-8 md:flex-row md:items-start md:gap-10 lg:gap-12">
-                    <div className="relative flex w-full min-w-0 flex-col gap-4 md:sticky md:top-0 md:max-w-[min(100%,720px)] md:flex-1 md:flex-row md:items-start">
+                    <div className="relative flex w-full min-w-0 flex-col gap-4 md:max-w-[min(100%,720px)] md:flex-1 md:flex-row md:items-start">
                       <div
                         className="hidden shrink-0 pr-1 md:block"
                         style={{ width: thumbColW }}
