@@ -18,4 +18,6 @@ export interface Product {
   size?: string;
   /** Полная ссылка «Купить в VK» (Medusa: metadata `clop_vk_url`, manifest: `vkUrls`). */
   vkPurchaseUrl?: string;
+  /** Папка в public/cloth (Medusa metadata clop_folder) — fallback фото с manifest. */
+  clopFolder?: string;
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Product } from "@/types/product";
 import { isMedusaConfigured, loadProductsFromMedusa } from "@/lib/medusaProducts";
+import { enrichProductsWithManifestImages } from "@/lib/manifestImageFallback";
 import { sanitizeExternalPurchaseUrl } from "@/lib/safeExternalUrl";
 
 export type { Product };
@@ -20,7 +21,8 @@ export function useProducts() {
         if (isMedusaConfigured()) {
           try {
             const fromMedusa = await loadProductsFromMedusa();
-            setProducts(fromMedusa);
+            const enriched = await enrichProductsWithManifestImages(fromMedusa);
+            setProducts(enriched);
             setError(null);
             return;
           } catch (medusaErr) {

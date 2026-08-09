@@ -231,6 +231,9 @@ export function mapMedusaStoreProductToProduct(p: MedusaStoreProduct, fallbackPr
     image: urls[0] ?? "",
     hoverImage: urls[1] ?? urls[0] ?? "",
     price: derivePrice(p, fallbackPrice),
+    ...(typeof meta.clop_folder === "string" && meta.clop_folder.trim()
+      ? { clopFolder: meta.clop_folder.trim() }
+      : {}),
     ...(vkPurchaseUrl ? { vkPurchaseUrl } : {}),
   };
 }
