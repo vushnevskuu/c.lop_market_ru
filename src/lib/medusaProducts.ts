@@ -101,6 +101,45 @@ function absolutizeMedusaImageUrl(url: string): string {
   return `${base}${path}`;
 }
 
+function getClopClothBase(): string {
+  const fromEnv = (import.meta.env.VITE_CLOP_CLOTH_BASE as string | undefined)?.trim();
+  if (fromEnv) return fromEnv.replace(/\/$/, "");
+  if (typeof window !== "undefined") return `${window.location.origin}/cloth`;
+  return "https://clop-market.vercel.app/cloth";
+}
+
+function isMedusaHostedStaticUrl(url: string): boolean {
+  try {
+    const p = new URL(url, "https://placeholder.local").pathname.toLowerCase();
+    return p.startsWith("/static/") || p.startsWith("/uploads/");
+  } catch {
+    return url.includes("/static/") || url.includes("/uploads/");
+  }
+}
+
+function parseClopImageFiles(metadata: Record<string, unknown>): string[] {
+  const raw = metadata.clop_image_files;
+  if (typeof raw === "string" && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) {
+        return parsed.filter((x): x is string => typeof x === "string" && x.trim().length > 0);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  return ["1.webp", "2.webp"];
+}
+
+function imagesFromClopFolder(folder: string, metadata: Record<string, unknown>): string[] {
+  const base = getClopClothBase();
+  const files = parseClopImageFiles(metadata);
+  return files.map(
+    (file) => `${base}/${encodeURIComponent(folder)}/${encodeURIComponent(file)}`,
+  );
+}
+
 /** Собираем все URL картинок: товар, thumbnail, вариант (в v2 часть фото только у варианта). */
 function collectMedusaImageUrls(p: MedusaStoreProduct): string[] {
   const out: string[] = [];
@@ -172,10 +211,15 @@ function derivePrice(p: MedusaStoreProduct, fallback: string): string {
 }
 
 export function mapMedusaStoreProductToProduct(p: MedusaStoreProduct, fallbackPrice: string): Product {
-  const urls = collectMedusaImageUrls(p);
+  const meta = p.metadata ?? {};
+  let urls = collectMedusaImageUrls(p);
+
+  const clopFolder = typeof meta.clop_folder === "string" ? meta.clop_folder.trim() : "";
+  if (clopFolder && (urls.length === 0 || urls.every(isMedusaHostedStaticUrl))) {
+    urls = imagesFromClopFolder(clopFolder, meta);
+  }
 
   const description = [p.description, p.subtitle].filter(Boolean).join("\n\n").trim();
-  const meta = p.metadata ?? {};
   const vkPurchaseUrl = sanitizeExternalPurchaseUrl(meta.clop_vk_url);
 
   return {
@@ -225,7 +269,7 @@ export async function loadProductsFromMedusa(): Promise<Product[]> {
   // Как в nextjs-starter-medusa: иначе без *variants.images картинки часто пустые (v2).
   const { products } = await medusa.store.product.list({
     region_id: regionId,
-    limit: 100,
+    limit: 300,
     fields: "*variants.calculated_price,*variants.images,*images,+metadata",
   });
 

@@ -10,6 +10,8 @@ interface ImportMetaEnv {
   readonly VITE_MEDUSA_ASSET_URL?: string;
   /** Publishable API key из Medusa Admin → Settings → Publishable API Keys */
   readonly VITE_MEDUSA_PUBLISHABLE_KEY?: string;
+  /** Fallback для фото из public/cloth (если в Medusa URL битый /static). */
+  readonly VITE_CLOP_CLOTH_BASE?: string;
 }
 
 interface ImportMeta {
