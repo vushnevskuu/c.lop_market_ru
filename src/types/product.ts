@@ -3,6 +3,8 @@ export interface Product {
   id: string;
   title: string;
   description: string;
+  /** Состав ткани / материал (Medusa: product.material). */
+  material?: string;
   sizes: Array<{
     size?: string;
     chest?: string;

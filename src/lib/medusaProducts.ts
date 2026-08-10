@@ -19,6 +19,7 @@ type MedusaStoreProduct = {
   handle: string;
   description?: string | null;
   subtitle?: string | null;
+  material?: string | null;
   thumbnail?: string | null;
   images?: MedusaImage[] | null;
   metadata?: Record<string, unknown> | null;
@@ -220,12 +221,14 @@ export function mapMedusaStoreProductToProduct(p: MedusaStoreProduct, fallbackPr
   }
 
   const description = [p.description, p.subtitle].filter(Boolean).join("\n\n").trim();
+  const material = typeof p.material === "string" ? p.material.trim() : "";
   const vkPurchaseUrl = sanitizeExternalPurchaseUrl(meta.clop_vk_url);
 
   return {
     id: p.handle || p.id,
     title: p.title,
     description,
+    ...(material ? { material } : {}),
     sizes: parseSizesFromMetadata(p.metadata),
     images: urls,
     image: urls[0] ?? "",
@@ -273,7 +276,7 @@ export async function loadProductsFromMedusa(): Promise<Product[]> {
   const { products } = await medusa.store.product.list({
     region_id: regionId,
     limit: 300,
-    fields: "*variants.calculated_price,*variants.images,*images,+metadata",
+    fields: "*variants.calculated_price,*variants.images,*images,+metadata,+material",
   });
 
   let list = (products ?? []) as MedusaStoreProduct[];

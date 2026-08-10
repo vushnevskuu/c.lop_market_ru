@@ -297,6 +297,13 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                           </div>
                         )}
 
+                        {product.material && (
+                          <p className="m-0 mt-4 break-words text-sm text-foreground/90 md:mt-5 md:text-base">
+                            <span className="text-muted-foreground">Состав: </span>
+                            {product.material}
+                          </p>
+                        )}
+
                         {product.sizes && product.sizes.length > 0 && product.sizes[0] && (
                           <div className="m-0 mt-4 p-0 text-black md:mt-6">
                             <div className="-mx-3 overflow-x-auto px-3 md:mx-0 md:px-0">
