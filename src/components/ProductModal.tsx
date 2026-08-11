@@ -7,7 +7,6 @@ import type { Product } from "@/types/product";
 import { formatProductCardTitle } from "@/lib/productCardDisplay";
 import GeoProductJsonLd from "@/components/GeoProductJsonLd";
 import ImageWithFormatFallback from "@/components/ImageWithFormatFallback";
-import { GEO_LAST_UPDATED } from "@/data/geoFaq";
 import { productPhotoFrameInnerClass } from "@/lib/productPhotoFrame";
 
 const COLUMN_LABEL_RU: Record<string, string> = {
@@ -273,16 +272,12 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                         <h2 className="break-words font-heading text-[clamp(1.25rem,3.5vw,2rem)] font-semibold uppercase leading-[1.15] tracking-tight md:text-[clamp(1.5rem,2.5vw,2rem)]">
                           {formatProductCardTitle(product.title)}
                         </h2>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Карточка обновлена:{" "}
-                          <time dateTime={`${GEO_LAST_UPDATED}T12:00:00+03:00`}>
-                            {new Date(`${GEO_LAST_UPDATED}T12:00:00+03:00`).toLocaleDateString("ru-RU", {
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            })}
-                          </time>
-                        </p>
+                        {product.material ? (
+                          <p className="mt-1 break-words text-xs text-muted-foreground md:text-sm">
+                            Состав:{" "}
+                            <span className="text-foreground/90">{product.material}</span>
+                          </p>
+                        ) : null}
                         {product.brand && (
                           <p className="break-words text-xs lowercase tracking-widest text-muted-foreground md:text-sm">
                             {product.brand}
@@ -295,13 +290,6 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                               {product.description}
                             </p>
                           </div>
-                        )}
-
-                        {product.material && (
-                          <p className="m-0 mt-4 break-words text-sm text-foreground/90 md:mt-5 md:text-base">
-                            <span className="text-muted-foreground">Состав: </span>
-                            {product.material}
-                          </p>
                         )}
 
                         {product.sizes && product.sizes.length > 0 && product.sizes[0] && (
